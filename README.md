@@ -1,1 +1,1 @@
-# plant-disease-classification-site
+# plant-disease-classification-ui
