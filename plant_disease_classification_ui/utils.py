@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+import numpy as np
+
+from PIL import Image
+
+
 base_classes = [
     "c_0",
     "c_1",
@@ -47,3 +52,15 @@ classes_and_models = {
         "model_name": "model_1"
     }
 }
+
+def load_and_prep_image(file_path, img_shape=128):
+    """
+    Reads in an image from file path, turns it into a tensor and reshapes into.
+    """
+
+    image = Image.open(file_path)
+    image = image.resize((img_shape, img_shape))
+    pixels = np.array(image)
+    pixels = pixels.astype(np.float32)
+    pixels = np.multiply(pixels, 1.0 / 255.0)
+    return pixels
