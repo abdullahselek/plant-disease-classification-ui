@@ -7,9 +7,11 @@ import SessionState
 import streamlit as st
 import torch
 
-from typing import List
+from typing import List, Optional
 from plant_disease_classification_ui import utils
-from plant_disease_classification_ui.plant_disease_classifier import PlantDiseaseClassifier
+from plant_disease_classification_ui.plant_disease_classifier import (
+    PlantDiseaseClassifier,
+)
 
 
 ### Streamlit code (works as a straigtht-forward script) ###
@@ -18,7 +20,7 @@ st.header("Identify what's in your plant photos!")
 
 
 @st.cache
-def make_classification(image: str, model: str, class_names: List):
+def make_classification(image: str, model: str, class_names: List) -> Optional[str]:
     """Makes classification from given image and trained PyTorch model.
     Args:
       image (str):
