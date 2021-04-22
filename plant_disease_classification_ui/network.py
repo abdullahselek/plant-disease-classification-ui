@@ -3,8 +3,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
-from plant_disease_classification_api.ml import constant
+import constant
 
 
 class CNN(nn.Module):
