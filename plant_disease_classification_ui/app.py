@@ -7,7 +7,7 @@ import streamlit as st
 import torch
 import utils
 
-from typing import List, Optional
+from typing import List, Tuple
 from session_state import SessionState
 from plant_disease_classifier import PlantDiseaseClassifier
 
@@ -17,30 +17,27 @@ st.title("Welcome to Plant Classification 🌱 📸")
 st.header("Identify what's in your plant photos!")
 
 
-@st.cache
-def make_classification(image: str, model: str, class_names: List) -> Optional[str]:
+@st.cache(suppress_st_warning=True)
+def make_classification(image_data: bytes, model: str) -> Tuple:
     """Makes classification from given image and trained PyTorch model.
     Args:
       image (str):
         File path of image that is used for classification.
       model (str):
         Model file path.
-      class_name (List):
-        List of plant class names.
     Returns:
-      pred_class (str):
+      image, pred_class (Tuple):
         Predicted class.
     """
 
-    image = utils.load_and_prep_image(image)
     dir_path = os.path.dirname(os.path.realpath(__file__))
     path = os.path.join(dir_path, "models", model)
     if os.path.exists(path):
         plant_disease_classifier = PlantDiseaseClassifier(model_path=path)
-        image_data = base64.b64decode(requestItem.data)
         pred_class = plant_disease_classifier.classify(image_data=image_data)
-        return pred_class
+        return image_data, pred_class
     else:
+        print("Model file does not exist!")
         None
 
 
@@ -57,7 +54,4 @@ MODEL = utils.classes_and_models["model_1"]["model_name"]
 
 # Display info about model and classes
 if st.checkbox("Show classes"):
-    st.write(f"You chose {MODEL}, these are the classes of food it can identify:\n", CLASSES)
-
-
-
+    st.write(f"You chose {MODEL}, these are the classes of plants it can identify:\n", CLASSES)
