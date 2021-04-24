@@ -55,3 +55,58 @@ MODEL = utils.classes_and_models["model_1"]["model_name"]
 # Display info about model and classes
 if st.checkbox("Show classes"):
     st.write(f"You chose {MODEL}, these are the classes of plants it can identify:\n", CLASSES)
+
+
+# File uploader allows user to add their own image
+uploaded_file = st.file_uploader(label="Upload an image of plant",
+                                 type=["png", "jpeg", "jpg"])
+
+
+# Setup session state to remember state of app so refresh isn't always needed
+# See: https://discuss.streamlit.io/t/the-button-inside-a-button-seems-to-reset-the-whole-app-why/1051/11 
+session_state = SessionState.get(classify_button=False)
+
+
+# Create logic for app flow
+if not uploaded_file:
+    st.warning("Please upload an image.")
+    st.stop()
+else:
+    session_state.uploaded_image = uploaded_file.read()
+    st.image(session_state.uploaded_image, use_column_width=True)
+    classify_button = st.button("Classify")
+
+
+# Did the user press the classify button?
+if classify_button:
+    session_state.classify_button = True 
+
+
+# And if they did...
+if session_state.classify_button:
+    session_state.image, session_state.pred_class = make_classification(image_data=session_state.uploaded_image, model=MODEL)
+    st.write(f"Prediction: {session_state.pred_class}")
+
+    # Create feedback mechanism (building a data flywheel)
+    session_state.feedback = st.selectbox(
+        "Is this correct?",
+        ("Select an option", "Yes", "No"))
+    if session_state.feedback == "Select an option":
+        pass
+    elif session_state.feedback == "Yes":
+        st.write("Thank you for your feedback!")
+        # Log prediction information to terminal (this could be stored in Big Query or something...)
+        print(utils.update_logger(image=session_state.image,
+                                  model_used=MODEL,
+                                  pred_class=session_state.pred_class,
+                                  correct=True))
+    elif session_state.feedback == "No":
+        session_state.correct_class = st.text_input("What should the correct label be?")
+        if session_state.correct_class:
+            st.write("Thank you for that, we'll use your help to make our model better!")
+            # Log prediction information to terminal (this could be stored in Big Query or something...)
+            print(utils.update_logger(image=session_state.image,
+                                      model_used=MODEL,
+                                      pred_class=session_state.pred_class,
+                                      correct=False,
+                                      user_label=session_state.correct_class))
